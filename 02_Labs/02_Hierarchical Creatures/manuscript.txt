@@ -1,0 +1,17 @@
+Hi, everyone.
+
+This is my video submission for real-time animation assignment 2.
+
+and this task was to implement a program that demonstrates Hierarchical Creatures.
+
+This video has two main parts, simple model and complex model.
+
+First u can see that, this is simple model with 2 joints. and this is the FK display mode, which means that u need to change the angle of each joint to reach the target. just like this. if u can reach the target, it will show text "reached".
+
+for IK part, i used the analytical solution to solve this problem. it is very easy to use some cosine law formula to calculate the angle of joint.
+
+the second part is complex model. as u can see, it has two different joint branchs. and each of them has 3 joints.it is more complex than the simple one. And for the FK part, it is the same way to change the angle with the simple model. just like this. 
+
+But for the IK mode, I used the CCD to solve it. and I also add a spline to show the animation of joint's movement. just like this. at the same time, if the target is so far from the joint. it will display text.
+
+Yeah that's all my submission, thank you for watching.

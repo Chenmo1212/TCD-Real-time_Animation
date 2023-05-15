@@ -1,0 +1,58 @@
+#version 330
+out vec4 FragColor;
+
+in vec3 fragPosTS;
+in vec3 lightPosTS;
+in vec3 viewPosTS;
+in vec2 texCoords;
+in vec3 normalIn;
+
+uniform sampler2D diffuseMap;
+uniform sampler2D normalMap;
+uniform sampler2D depthMap; //Depth map
+uniform int mappingMode = 1;
+
+// Used to calculate texture offset (accepts two parameters, texture coordinates and view vector)
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir){ 
+    float depth =  texture(depthMap, texCoords).r;
+    // H£¨A£©/ Pz (viewDir.xy is the texture coordinates at the view vector)
+    // 0.05 is a correction value because it is an approximate calculation
+    vec2 p = viewDir.xy * depth / viewDir.z * 0.05;
+    return texCoords - p;    //Returns the texture coordinates after offset
+}
+
+void main()
+{
+  vec3 normal;
+
+  if(mappingMode == 1) {
+    normal = normalize(normalIn);
+  }
+  else if(mappingMode == 2){
+    normal = texture(normalMap, texCoords).rgb;
+    //Convert normal vector to [-1,1] range
+    normal = normalize(normal * 2.0 - 1.0);  //This normal vector is in tangent space
+  } else if(mappingMode == 3) {
+    vec3 viewDir   = normalize(viewPosTS - fragPosTS);
+    vec2 tmpTexCoords = ParallaxMapping(texCoords,  viewDir); //Get offset texture coordinates
+
+    normal = texture(normalMap, tmpTexCoords).rgb;
+    //Convert normal vector to [-1,1] range
+    normal = normalize(normal * 2.0 - 1.0);  //This normal vector is in tangent space
+  }
+
+  vec3 color = texture(diffuseMap, texCoords).rgb;
+
+  vec3 ambient = 0.6 * color;
+
+  vec3 lightDir = normalize(lightPosTS - fragPosTS);
+  float diff = max(dot(lightDir, normal), 0.0);
+  vec3 diffuse = diff * color;
+
+  vec3 viewDir = normalize(viewPosTS - fragPosTS);
+  vec3 halfwayDir = normalize(lightDir + viewDir);
+  float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
+  vec3 specular = vec3(0.2) * spec;
+
+  FragColor = vec4(ambient + diffuse + specular, 1.0);
+}

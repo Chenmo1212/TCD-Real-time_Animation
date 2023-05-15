@@ -1,0 +1,30 @@
+// Several different sources were used to help make this code.
+#version 330 core
+
+in vec3 vertex_position;
+in vec3 vertex_normal;
+
+out vec3 normal;
+out vec3 viewDir; 
+out vec3 lightDir;
+out float lightDistance; 
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+
+void main() {
+	normal = mat3(model) * vertex_normal;
+
+	vec3 fragPos = vec3(model * vec4(vertex_position, 1.0f));
+
+	viewDir = normalize(viewPos - fragPos);
+	lightDir = lightPos - fragPos;
+	lightDistance = length(lightDir);
+	lightDir /= lightDistance;
+	lightDistance *= lightDistance;
+
+	gl_Position = proj * view * vec4(fragPos, 1.0);
+}

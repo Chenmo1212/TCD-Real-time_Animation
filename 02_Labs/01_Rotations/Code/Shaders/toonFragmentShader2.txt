@@ -1,0 +1,29 @@
+// This version of Toon Shading does not use the viewers position, instead
+// based only on the position of the fragment and the light. A colour is
+// directly assigned based on the intensity.
+#version 330 core
+out vec4 FragColor;
+
+in vec3 normal;
+in vec3 fragPos;
+
+uniform vec3 lightPos;
+
+void main() {
+	
+	vec4 color;
+	vec3 n = normalize(normal);
+	vec3 lightDir = normalize(vec3(lightPos) - fragPos);
+	float intensity = dot(vec3(lightDir), n);
+
+	if (intensity > 0.95)
+		color = vec4(1.0,0.5,0.5,1.0);
+	else if (intensity > 0.5)
+		color = vec4(0.6,0.3,0.3,1.0);
+	else if (intensity > 0.25)
+		color = vec4(0.4,0.2,0.2,1.0);
+	else
+		color = vec4(0.0,0.0,0.0,1.0);
+
+	FragColor = color;
+}

@@ -1,0 +1,51 @@
+#version 330 core
+
+#define PI 3.14159265
+
+out vec3 FragColor;
+
+in vec3 normal;
+in vec3 viewDir;
+in vec3 lightDir;
+in float lightDistance;
+
+uniform vec3 diffuseColor;
+uniform vec3 specularColor;
+uniform float fresnel = 0.8;
+uniform float roughness;
+uniform vec3 lightColor;
+uniform float specStrength = 0.1;
+
+vec3 CookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, vec3 lightColor) {
+	float normalDotLight = max(0, dot(normal, lightDirection));
+	float cookTorrance = 0.0;
+	if (normalDotLight > 0) {
+		vec3 H = normalize(lightDirection + viewDirection);
+		float normalDotH = dot(normal, H);
+		float normalDotViewDir = dot(normal, viewDirection);
+		float lightDirDotH = max(0, dot(lightDirection, H));
+
+		// Distribution
+		float roughnessSquared = roughness * roughness;
+		float normalDotHSquared = normalDotH * normalDotH;
+		float D = (1.0 / (roughnessSquared * pow(normalDotH, 4.0))) * exp(((normalDotHSquared) - 1.0) / (roughnessSquared * (normalDotHSquared)));
+
+		// Fresnel
+		float F = fresnel + (pow(1.0 - lightDirDotH, 5.0) * (1.0 - fresnel));
+		
+		// Geometry Function
+		float normalDotHBy2 = 2.0 * normalDotH;
+		float G = min(min(1.0, (normalDotHBy2 * normalDotViewDir) / lightDirDotH), (normalDotHBy2 * normalDotLight) / lightDirDotH);
+
+		// Cook-Torrance Function
+		cookTorrance = (D * F * G) / (PI * normalDotLight * normalDotViewDir);
+	}
+	float k = 0.2;
+	k = k + specStrength;
+	return diffuseColor * lightColor * normalDotLight + lightColor * specularColor * normalDotLight * (k + cookTorrance * (1.0 - k));
+}
+
+void main()
+{
+    	FragColor = CookTorrance(normal, lightDir, viewDir, lightColor);
+}

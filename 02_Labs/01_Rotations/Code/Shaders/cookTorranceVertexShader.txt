@@ -1,0 +1,29 @@
+#version 330 core
+
+in vec3 vertex_position;
+in vec3 vertex_normal;
+
+out vec3 normal;
+out vec3 lightDir;
+out vec3 viewDir;
+out float attenuation;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+
+void main() {
+    
+	normal = mat3(model) * vertex_normal;
+    vec3 fragPos = vec3(model * vec4(vertex_position, 1.0f));
+    viewDir = normalize(viewPos - fragPos);
+    lightDir = normalize(lightPos - fragPos);
+
+    float radius = 50.0;
+    float dist = length(vec3((view * model) * vec4(lightPos, 1.0)) - fragPos);
+    attenuation = 1.0 / (1.0 + ((2.0 / radius) * dist) + ((1.0 / (radius * radius)) * (dist * dist)));
+
+    gl_Position = proj * view * vec4(fragPos, 1.0);
+}
